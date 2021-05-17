@@ -1,0 +1,98 @@
+{% extends "layout.html" %} 
+{% block title %}Ana Sayfa{% endblock %}  
+{% block body %}
+{% import "macros.html" as m %}
+
+{{m.ust_bilgi("Hoşgeldin","far fa-smile-wink")}}
+
+  <div class="row">
+
+    <div class="col">
+    </div>
+
+    <!-- HATIRLATMALAR İŞ-->
+    <div class="col">
+      {{m.button_target("İşle İlgili Hatırlatma Ekle", "fas fa-plus", "modal", "#notekle2")}}
+      <table class="table table-sm table-hover table-striped align-middle mt-2">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Konu</th>
+            <th>İçerik</th>
+            <th>Tarih</th>
+            <th>İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for noti in isselnotlar %}
+          <tr>
+            <td>{{loop.index}}</td>
+            <td>{{noti.konu}}</td>
+            <td>{{noti.icerik}}</td>
+            <td>{{noti.tarih.strftime('%d.%m.%Y')}}</td>
+            <td>
+              {{m.anchor_tamamlama(url_for('main.not_tamamlama2', not_id = noti.id))}}
+              {{m.sil2(noti.id,"not2areadelete",url_for('main.not_sil2', not_id = noti.id))}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HATIRLATMALAR KİŞİSEL-->
+    <div class="col">
+      {{m.button_target("Kişisel Hatırlatma Ekle", "fas fa-plus", "modal", "#notekle")}}
+      <table class="table table-sm table-hover table-striped align-middle mt-2">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Konu</th>
+            <th>İçerik</th>
+            <th>Tarih</th>
+            <th>İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for noti in kisiselnotlar %}
+          <tr>
+            <td>{{loop.index}}</td>
+            <td>{{noti.konu}}</td>
+            <td>{{noti.icerik}}</td>
+            <td>{{noti.tarih.strftime('%d.%m.%Y')}}</td>
+            <td>
+              {{m.anchor_tamamlama(url_for('main.not_tamamlama', not_id = noti.id))}}
+              {{m.sil(noti.id,"notareadelete",url_for('main.not_sil', not_id = noti.id))}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+
+<!-- NOT1 EKLEME MODAL -->
+{{m.model_acilis("notekle","notModalLabel")}}
+  {{m.model_header("Not Ekle","notModalLabel")}}
+    <form action="{{url_for('main.not_ekle')}}" method="POST">
+      {{m.input_group_modal("Konu","text","not_konu_ekle", "")}}
+      {{m.input_group_modal("İçerik","text","not_icerik_ekle", "")}}
+      {{m.input_group_modal("Tarih","date","not_tarih_ekle", "")}}
+      {{m.button_resimsiz("KAYDET")}}
+    </form>
+{{m.model_kapanis()}}
+
+<!-- NOT2 EKLEME MODAL -->
+{{m.model_acilis("notekle2","not2ModalLabel")}}
+  {{m.model_header("Not Ekle","not2ModalLabel")}}
+    <form action="{{url_for('main.not_ekle2')}}" method="POST">
+        {{m.input_group_modal("Konu","text","not_konu_ekle", "")}}
+        {{m.input_group_modal("İçerik","text","not_icerik_ekle", "")}}
+        {{m.input_group_modal("Tarih","date","not_tarih_ekle", "")}}
+        {{m.button_resimsiz("KAYDET")}}
+    </form>
+{{m.model_kapanis()}}
+
+{% endblock body %}

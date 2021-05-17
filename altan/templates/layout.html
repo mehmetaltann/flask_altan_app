@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Fontawesome -->
+    {% block head %}{% endblock head%}
+    <script src="https://kit.fontawesome.com/d97bad9e3a.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{url_for ('static', filename='img/favicon.ico')}}"/>
+    <!-- Core CSS -->
+    <link href="{{url_for ('static', filename='css/styles.css')}}" rel="stylesheet">
+    <!-- Title -->
+    <title> Altan - {% block title %}{% endblock%}</title>
+  </head>
+
+  <body>
+    <!-- HEADER -->
+    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="{{url_for('main.index')}}">Mehmet Altan</a>
+      <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <input class="form-control form-control-dark w-100" type="text" placeholder="Not ..." aria-label="Search">
+      <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+          <a class="nav-link" href="{{url_for('giris.log_out')}}">Çıkış Yap</a>
+        </li>
+      </ul>
+      <img class="profile-foto" src="https://lh3.googleusercontent.com/ogw/ADGmqu9GJQ87AyAJWtsgkV5k1K4G4mFkTQyxs2v1AX6TdA=s83-c-mo" alt="profile">
+
+    </header>
+    {% import "macros.html" as m %}
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- SIDEBAR -->
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+          <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="list-group-item sidebar-separator-title text-muted d-flex align-items-center" href="{{url_for('main.index')}}">
+                  <i class="fas fa-home"></i> Ana Sayfa
+                </a>
+              </li>
+              <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center"><i class="far fa-building"></i>KOSGEB</li>
+              {{m.nav_link("İşletme Bilgileri","fas fa-industry",url_for('main.isletme'))}}
+              {{m.nav_link("Projeler","fas fa-tasks",url_for('main.projeleri_getir'))}}
+              {{m.nav_link("Ödemeler","fas fa-money-bill-wave",url_for('main.odemeleri_getir'))}}
+              {{m.nav_link("İşletmeler","fas fa-table",url_for('main.isletmeler'))}}
+              {{m.nav_link("Bağlantılar","fas fa-external-link-alt",url_for('main.baglantilar'))}}
+              <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center"><i class="fas fa-user-edit"></i>Kişisel</li>
+              {{m.nav_link("Aile Bütçesi","fas fa-lira-sign",url_for('kisisel.hesap'))}}
+              {{m.nav_link("Bütçe Sorgu","fas fa-chart-pie",url_for('kisisel.butce_sorgu'))}}
+              {{m.nav_link("Yatırım Hesabı","fas fa-coins",url_for('kisisel.yatirim'))}}
+              {{m.nav_link("Kitaplar","fas fa-book",url_for('kisisel.kitaplar'))}}
+              {{m.nav_link("Diziler","fas fa-tv",url_for('kisisel.diziler'))}}
+              {{m.nav_link("Filmler","fas fa-film",url_for('kisisel.filmler'))}}
+            </ul>
+          </div>
+        </nav>
+
+        <!-- CONTENT -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pb-4"> 
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center" role="alert" id="successMessage"> {{ message }}</div>
+            {% endfor %}
+          {% endif %}
+          {% endwith %}
+
+          {% block body %} {% endblock body %}
+          
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    {% block script %}{% endblock script %}
+    <!-- Core JavaScript -->
+    <script src="{{url_for ('static', filename='js/alert.js')}}"></script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+{% block title %}Aile Bütçesi{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+{{m.ust_bilgi("Aile Bütçesi","fas fa-home")}}
+
+<!-- Yıl ve Ay Seçim / Bilgileri Getir -->
+<form class="row g-2 border-bottom" action="{{url_for('kisisel.tarih_verisi_al')}}" method="POST">
+  <div class="col-md-1 align-self-center">
+    <h5>Tarih</h5>
+  </div>
+  <div class="col">
+    <div class="row">
+      <div class="col">
+        {% call m.select_modal("YIL","yil") %}
+          {% for number in range(2013,2023) %}
+            <option value={{number}} {{'selected' if tarih.yil == number}}>{{number}}</option>
+          {% endfor %}
+        {% endcall %}
+      </div>
+      <div class="col">
+        {% call m.select_modal("AY","ay") %}
+          <option value=1 {{'selected' if tarih.ay == 1}}>Ocak</option>
+          <option value=2 {{'selected' if tarih.ay == 2}}>Şubat</option>
+          <option value=3 {{'selected' if tarih.ay == 3}}>Mart</option>
+          <option value=4 {{'selected' if tarih.ay == 4}}>Nisan</option>
+          <option value=5 {{'selected' if tarih.ay == 5}}>Mayıs</option>
+          <option value=6 {{'selected' if tarih.ay == 6}}>Haziran</option>
+          <option value=7 {{'selected' if tarih.ay == 7}}>Temmuz</option>
+          <option value=8 {{'selected' if tarih.ay == 8}}>Ağustos</option>
+          <option value=9 {{'selected' if tarih.ay == 9}}>Eylül</option>
+          <option value=10 {{'selected' if tarih.ay == 10}}>Ekim</option>
+          <option value=11 {{'selected' if tarih.ay == 11}}>Kasım</option>
+          <option value=12 {{'selected' if tarih.ay == 12}}>Aralık</option>
+        {% endcall %}
+      </div>
+      <div class="col">
+        {{m.button("Getir","fas fa-search")}}
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Gelir -->
+<form class="row g-2 mt-2 pb-2 border-bottom"
+  action="{{url_for('kisisel.gelir_ekle', tarih_yil=tarih.yil, tarih_ay=tarih.ay)}}" method="POST">
+  <div class="col-md-1 align-self-center">
+    <h5>Gelir</h5>
+  </div>
+  <div class="col">
+    <div class="row">
+      <div class="col-md-4 mb-2">
+        {{m.input_group_2("Maaş","TL","number","maas",gelir.maas)}}
+      </div>
+      <div class="col-md-4 mb-2">
+        {{m.input_group_2("Fon Satış","TL","number","fon_satis",gelir.fon_satis)}}
+      </div>
+      <div class="col-md-4 mb-2">
+        {{m.input_group_2("Diğer","TL","number","gdiger",gelir.gdiger)}}
+      </div>
+      <div class="col-md-4 mb-2">
+        {{m.input_group("Açıklama","text","gelir_aciklama",gelir.aciklama)}}
+      </div>
+      <div class="col-md-4 mb-2">
+        {{m.input_group_2("Toplam Gelir","TL","number","toplam_gelir",gelir.toplam)}}
+      </div>
+      <div class="col-md-4 mb-2">
+        {{m.button("Gelir Ekle / Güncelle","fas fa-plus")}}
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Gider -->
+<form class="row g-2 mt-2 pb-2 border-bottom" action="{{url_for('kisisel.gider_ekle', tarih_yil=tarih.yil, tarih_ay=tarih.ay)}}"
+  method="POST">
+  <div class="col-md-1 align-self-center">
+    <h5>Gider</h5>
+  </div>
+  <div class="col-md-11">
+    <div class="row">
+      <div class="col-md-4 col-sm-12 mb-2">
+        <div class="input-group mb-2"><h6>Kredi Kartı</h6></div>
+        {{m.input_group_mb2("Market","number","market",kredi_karti.market)}}
+        {{m.input_group_mb2("Araç","number","araba",kredi_karti.araba)}}
+        {{m.input_group_mb2("Giyim","number","giyim",kredi_karti.giyim)}}
+        {{m.input_group_mb2("Dışarıdan Yemek","number","hazir_yemek",kredi_karti.hazir_yemek)}}
+        {{m.input_group_mb2("Sağlık","number","saglik",kredi_karti.saglik)}}
+        {{m.input_group_mb2("Mobilya/Beyaz Eşya","number","mobilya",kredi_karti.mobilya)}}
+        {{m.input_group_mb2("Eğitim/Eğlence/Teknoloji","number","egitim",kredi_karti.egitim)}}
+        {{m.input_group_mb2("Diğer","number","kredi_karti_diger",kredi_karti.kdiger)}}
+        {{m.input_group_2_readonly("Toplam Kredi Kartı","TL","number","kredi_karti_toplam",kredi_karti.toplam)}}
+      </div>
+      <div class="col-md-4 col-sm-12 mb-2">
+        <div class="input-group mb-2"><h6>Nakit Giderler</h6></div>
+        {{m.input_group_mb2("Kira","number","kira",nakit_gider.kira)}}
+        {{m.input_group_mb2("Aidat","number","aidat",nakit_gider.aidat)}}
+        {{m.input_group_mb2("Yakıt","number","yakit",nakit_gider.yakit)}}
+        {{m.input_group_mb2("Bireysel Emeklilik","number","bes",nakit_gider.bes)}}
+        {{m.input_group_mb2("Fon Alım","number","fon_alim",nakit_gider.fon_alim)}}
+        {{m.input_group_mb2("ATM Nakit","number","atm_nakit",nakit_gider.atm)}}
+        {{m.input_group_mb2("Diğer","number","nakit_gider_diger",nakit_gider.ndiger)}}
+        {{m.input_group_mb2("Açıklama","text","nakit_gider_aciklama",nakit_gider.aciklama)}}
+        {{m.input_group_2_readonly("Toplam Nakit Gider","TL","number","nakit_gider_toplam",nakit_gider.toplam)}}
+      </div>
+      <div class="col-md-4 col-sm-12 mb-2">
+        <div class="input-group mb-2"><h6>Faturalar</h6></div>
+        {{m.input_group_mb2("Elektrik","number","elektrik",fatura.elektrik)}}
+        {{m.input_group_mb2("Su","number","su",fatura.su)}}
+        {{m.input_group_mb2("Doğalgaz","number","dogalgaz",fatura.dogalgaz)}}
+        {{m.input_group_mb2("TV / İnternet","number","gider_tv_internet",fatura.tv_internet)}}
+        {{m.input_group_mb2("Mehmet / Tel","number","mehmet_tel",fatura.tel_mehmet)}}
+        {{m.input_group_mb2("Sena / Tel","number","sena_tel",fatura.tel_sena)}}
+        {{m.input_group_2_readonly("Toplam Fatura","TL","number","fatura_toplam",fatura.toplam)}}
+      </div>
+    </div>
+  </div>
+  <div class="col offset-md-1">
+    <div class="row">
+      <div class="col-md-8 mb-2">
+        {{m.input_group_2_readonly("Toplam Gider","TL","number","gider_toplam",toplam_gider)}}
+      </div>
+      <div class="col-md-4">
+        {{m.button("Gider Ekle / Güncelle","fas fa-plus")}}
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock body %}

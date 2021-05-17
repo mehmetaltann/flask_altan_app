@@ -1,0 +1,112 @@
+{% extends "layout.html" %} 
+{% block head %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+{% endblock head %}
+{% block title %}Bütçe Sorgulama{% endblock %}
+{% block body %}
+
+{% import "macros.html" as m %}
+
+{{m.ust_bilgi("Bütçe Sorgulama")}}
+
+<div class="container-fluid">
+    <form class="row g-2 pb-2" action="{{url_for('kisisel.butce_sorgula')}}" method="POST">
+        <div class="col">   
+            {% call m.select("Başlangıç Tarihi","baslangic_yil") %}
+                {% for yil in defaults["yillar"] %}
+                    <option value="{{yil}}" {{'selected' if yil == defaults['bas_yil'] }}>{{yil}}</option>
+                {% endfor %}
+            {% endcall %}
+        </div>
+        <div class="col">
+            {% call m.select("Bitiş Tarihi","bitis_yil") %}
+                {% for yil in defaults["yillar"] %}
+                    <option value="{{yil}}" {{'selected' if yil == defaults['bit_yil'] }}>{{yil}}</option>
+                {% endfor %}
+            {% endcall %}
+        </div>    
+        <div class="col">
+            {% call m.select("Gelir","gelir-sorgu") %}
+                {% for gelir_value, gelir_label in packed_gelirler %}
+                    <option value="{{gelir_value}}" {{'selected' if gelir_value == defaults['gelir_sor'] }}>{{gelir_label}}</option>
+                {% endfor %}
+            {% endcall %}
+        </div> 
+        <div class="col">
+            {% call m.select("Gider","gider-sorgu") %}
+                {% for gider_value, gider_label in packed_giderler %}
+                <option value="{{gider_value}}" {{'selected' if gider_value == defaults['gider_sor'] }}>{{gider_label}}</option>
+                {% endfor %}
+            {% endcall %}
+        </div>
+        {{m.button_class("Sorgula","fas fa-search","btn btn-outline-secondary btn-block")}}
+    </form>
+
+    <div class="row g-2 pb-2 pt-2">
+        <div class="col-md-6">
+            <h5>Gelir Grafiği</h5>
+            <canvas id="myChart"></canvas>            
+            <script>
+                var ctx = document.getElementById('myChart').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ defaults['ay_sayisi']|tojson|safe }},
+                        datasets: [{
+                            label: '# Ay',
+                            data: {{ defaults['gelir_tablo']|tojson|safe }},
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+            </script>
+            <br>
+            <h5> - Toplam Gelir - {{defaults['toplam_gelir']}}</h5>
+            <h5> - Ortalama Gelir - {{defaults['gelir_ort']}}</h5>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Gider Grafiği</h5>
+            <canvas id="myChart2"></canvas>
+            <script>
+                var ctx = document.getElementById('myChart2').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ defaults['ay_sayisi']|tojson|safe }},
+                        datasets: [{
+                            label: '# Ay',
+                            data: {{ defaults['gider_tablo']|tojson|safe }},
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+            </script>
+            <br>
+            <h5> - Toplam Gider - {{defaults['toplam_gider']}}</h5>
+            <h5> - Ortalama Gider - {{defaults['gider_ort']}}</h5>
+            <h5>{{perc}}</h5>
+        </div>
+    </div>
+</div>
+
+
+{% endblock body %}
+
+

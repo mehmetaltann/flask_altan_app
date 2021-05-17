@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.css" />
+{% endblock head %}
+{% block title %}Projeler{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+
+<!-- ÜST BİLGİ -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="fas fa-project-diagram"></i>Projeler</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <h5>{{defaults.program}} - {{defaults.durum}}</h5>
+  </div>
+</div>
+
+<!-- ARAMA -->
+<div class="container-fluid">
+  <form class="row g-2 pb-2" action="{{url_for('main.projeler_sorgula')}}" method="POST">
+    <div class="col-md-5">
+      {% call m.select("Proje","projeler-program") %}
+        {% for program in defaults.programlar %}
+          <option value="{{program.isim}}" {{'selected' if program.isim == defaults.program }}>{{program.isim}}</option>
+        {% endfor %}
+      {% endcall %}
+    </div>
+    <div class="col-md-4">
+      {% call m.select("Durum","projeler-durum") %}
+        {% for program_durum in defaults.program_durumlari %}
+          <option value="{{program_durum}}" {{'selected' if program_durum == defaults.durum }}>{{program_durum}}</option>
+        {% endfor %}
+      {% endcall %}
+    </div>
+    <div class="col-md-3">
+      {{m.button("Sorgula","fas fa-search")}}
+    </div>
+  </form>
+  <div class="col-md-12 border-top pt-3">
+    {{m.input_group_id("Arama","fas fa-search","text","projeler_ara","projeler_ara","")}}
+  </div>
+</div>
+
+<!-- VERİ TABLOSU -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12 mt-2">
+      <table id="projeler" class="table table-hover table-striped table-sm" cellspacing="0" width="100%">
+        {{m.tablehead_10("","İsletmeler","Vergi","Program","Başlama","Süre","Tamamlanma","Takip Tarihi","Kalan Gün","İşlemler")}}
+        <tbody>
+          {% for proje in projeler %}
+          <tr>
+            <th>{{loop.index}}</th>
+            <td style="font-size:small">{{proje.unvan}}</td>
+            <td>{{proje.vergi}}</td>
+            <td style="font-size:small">{{proje.program_ismi}}</td>
+            <td>{{proje.baslama_tarihi.strftime('%d.%m.%Y')}}</td>
+            <td>{{proje.sure}}</td>
+            <td>{{proje.tamamlanma_tarihi.strftime('%d.%m.%Y')}}</td>
+            {% set kalan_gun = (proje.takip_tarihi - defaults.today).days%}
+            {% if kalan_gun > 2000 %}
+            <td>Yok</td>
+            <td>Yok</td>
+            {% else %}
+            {% if proje.takip_tarihi < defaults.today %}
+            <td style="color: red;">{{proje.takip_tarihi.strftime('%d %B %Y')}}</td>
+            {% else %}
+            <td>{{proje.takip_tarihi.strftime('%d %B %Y')}}</td>
+            {% endif %}
+            {% if kalan_gun < 2 %}
+            <td style="color: red;">{{kalan_gun}}</td>
+            {% else %}
+            <td style="color: green;">{{kalan_gun}}</td>
+            {% endif %}
+            {% endif %}
+            <td style="text-align:center">
+              <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal"
+                  data-target="#myOutput{{proje.id}}"><span class="fas fa-pen"></span></button>
+              {{m.sil(proje.id,"projeareadelete",url_for('main.proje_sil', proje_id=proje.id, program=proje.program_ismi, durum=proje.durum))}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PROJE GÜNCELLEME MODAL -->
+{% for proje in projeler %}
+<div class="modal fade" id="myOutput{{proje.id}}" tabindex="-1" role="dialog" aria-labelledby="#projeguncelleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {{m.model_header("Proje Guncelle","projeguncelleModalLabel")}}
+        {{m.input_group_modal_readonly("","text","proje-program-ismi",proje.program_ismi)}}
+        <form action="{{url_for('main.proje_verisi_guncelle', proje_id = proje.id, program=proje.program_ismi, durum=proje.durum)}}"
+          method="POST">
+          {{m.input_group_modal("Başlama Tarihi","date","projeler-baslamatarihi-guncelle",proje.baslama_tarihi)}}
+          {{m.input_group_modal_2("Süre","Ay","number","projeler-sure-guncelle",proje.sure)}}
+          {{m.input_group_modal("Tamamlanma Tarihi","date","projeler-tamamlanmatarihi-guncelle",proje.tamamlanma_tarihi)}}
+          {% set kalan_gun = (proje.takip_tarihi - defaults.today).days%}
+          <div class="input-group mb-3">
+            <span class="input-group-text">Takip Tarihi</span>
+            <input type="date" class="form-control" name="projeler-takiptarihi-guncelle" value={{proje.takip_tarihi}}>
+            <div >
+              <select class="form-select" name="varyok">
+                <option value="var" {{'selected'  if not kalan_gun > 2000 }}>Var</option>
+                <option value="yok" {{'selected' if kalan_gun > 2000 }}>Yok</option>
+              </select>
+            </div>
+          </div>
+          {% call m.select_modal("Durum","projeler-durum-guncelle") %}
+            {% for program_durum in defaults.program_durumlari %}
+            <option value="{{program_durum}}" {{'selected' if program_durum == proje.durum }}>{{program_durum}}</option>
+            {% endfor %}
+          {% endcall %}
+          {{m.button_resimsiz("GÜNCELLE")}}
+        </form>
+    {{m.model_kapanis()}}
+
+{% endfor %}
+
+<!-- TABLO JAVASCRIPT -->
+{% block script %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.js"></script>
+<script src="{{url_for ('static', filename='js/datatable.js')}}"></script>
+{% endblock script %}
+{% endblock body %}

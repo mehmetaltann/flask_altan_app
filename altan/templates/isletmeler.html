@@ -1,0 +1,62 @@
+{% extends "layout.html" %} 
+<!-- TABLO CSS -->
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.css" />
+{% endblock head %}
+{% block title %}İşletmeler{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+{{m.ust_bilgi("İşletmeler")}}
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      {{m.input_group_id("Arama","fas fa-search","text","isletmeler_ara","isletmeler_ara","")}}
+    </div>
+    <div class="col-md-12 mt-2">
+      <table id="isletmeler" class="table table-hover table-striped" cellspacing="0" width="100%">
+        {{m.tablehead_9("","Unvan","Vergi
+        No","Sektör","e-Mail","Beyanname","Bilgi","Durum","İşlemler")}}
+        <tbody>
+          {% for isletme in isletmeler %}
+          <tr>
+            <th>{{loop.index}}</th>
+            <td class="col-3">{{isletme.unvan}}</td>
+            <td>{{isletme.vergi}}</td>
+            <td class="col-3">{{isletme.sektor_ismi}}</td>
+            <td class="col-2">{{isletme.mail}}</td>
+            <td>{{isletme.bey_yil}}</td>
+            <td>{{isletme.bilgi}}</td>
+            <td>{{isletme.durum}}</td>
+            <td style="text-align:center" class="col-1">
+              <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#myOutput{{isletme.id}}"><span class="fas fa-pen"></button>                        
+                <div class="modal fade" id="myOutput{{isletme.id}}" tabindex="-1" role="dialog" aria-labelledby="^#isletmebilgiModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      {{m.model_header("İşletme Bilgileri Güncelle","isletmebilgiModalLabel")}}
+                        <form action="{{url_for('main.isletmeler_guncelle', isletme_id=isletme.id)}}" method="POST">
+                          {{m.input_group_modal("Adres","text","adresguncelle", isletme.adres)}}
+                          {{m.input_group_modal("Beyanname Yıl","text","beyyilguncelle", isletme.bey_yil)}}
+                          {{m.input_group_modal("Bilgi","text","bilgiguncelle", isletme.bilgi)}}
+                          {% call m.select_modal("Durum","durumguncelle") %}
+                            <option value="AKTİF" {{'selected' if isletme.durum == "AKTİF" }}>Aktif</option>
+                            <option value="PASİF" {{'selected' if isletme.durum == "PASİF" }}>Pasif</option>
+                          {% endcall %}
+                          {{m.button_resimsiz("GÜNCELLE")}}
+                        </form>
+                      {{m.model_kapanis()}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TABLO JAVASCRIPT -->
+{% block script %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.js"></script>
+<script src="{{url_for ('static', filename='js/datatable.js')}}"></script>
+{% endblock script %}
+{% endblock body %}

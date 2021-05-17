@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.css"/>
+{% endblock head %}
+{% block title %}Ödemeler{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+
+<!-- ÜST BİLGİ -->
+{{m.ust_bilgi("Ödemeler","fas fa-file-invoice-dollar")}}
+
+<!-- ÖDEME FİLTRELEME -->
+<div class="container-fluid">
+  <div class="row g-2 pb-3">
+    <div class="col">
+      <div class="accordion accordion-flush" id="sorgulamalar2">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="flush-headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sorgulamalar" aria-expanded="false" aria-controls="flush-collapseOne">
+              <h6><i class="fas fa-search"></i>Sorgulamalar</h6>
+            </button>
+          </h2>
+          <div id="sorgulamalar" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#sorgulamalar2">
+            <div class="accordion-body">
+              <form class="row" action="{{url_for('main.odeme_sorgulama')}}" method="POST">
+                <div class="d-grid gap-2 mx-auto">
+                  <div class="btn-group">
+                    {% if defaults.durum == "BEKLEMEDE" %}
+                      <input type="radio" class="btn-check" name="odeme_durum_bilgisi" id="option2" value="BEKLEMEDE" autocomplete="off" checked />
+                      <label class="btn btn-outline-secondary" for="option2">Bekleyen Ödemeler</label>     
+                      <input type="radio" class="btn-check" name="odeme_durum_bilgisi" id="option3" value="ÖDENDİ" autocomplete="off" />
+                      <label class="btn btn-outline-secondary" for="option3">Tüm Ödemeler</label>
+                    {% else %}
+                      <input type="radio" class="btn-check" name="odeme_durum_bilgisi" id="option2" value="BEKLEMEDE" autocomplete="off"  />
+                      <label class="btn btn-outline-secondary" for="option2">Bekleyen Ödemeler</label>     
+                      <input type="radio" class="btn-check" name="odeme_durum_bilgisi" id="option3" value="ÖDENDİ" autocomplete="off" checked />
+                      <label class="btn btn-outline-secondary" for="option3">Tüm Ödemeler</label>              
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6 mt-2">
+                  {% call m.select("Program","odeme_proje_bilgisi") %}
+                    {% for program_ismi in defaults.programlar %}
+                      <option value="{{program_ismi.isim}}" {{'selected' if program_ismi.isim == defaults.program}}>{{program_ismi.isim}}</option>
+                    {% endfor %}
+                  {% endcall %}
+                </div>
+                <div class="col-md-6 mt-2">
+                  {% call m.select("Destek","odeme_destek_bilgisi") %}
+                    {% for destek_ismi in defaults.destekler %}
+                      <option value="{{destek_ismi.isim}}" {{'selected' if destek_ismi.isim == defaults.destek }}>{{destek_ismi.isim}}</option>
+                    {% endfor %}
+                  {% endcall %}
+                </div>
+                <div class="col-md-12 mt-2">
+                  {{m.input_group("İşletme","text","odeme_isletme_bilgisi",defaults.isletme)}}
+                </div>
+                <div class="col mt-2">
+                  {{m.button("Ara","fas fa-search")}}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>  
+  <div class="row g-2 pb-3 ">
+      <div class="col">
+        {{m.input_group_2_readonly("Toplam Ödeme Oluru Sayısı","adet","number","odeme_oluru_sayisi",odemeler|count)}}
+      </div>
+      <div class="col pb-1">
+        {{m.input_group_2_readonly("Toplam Ödem Tutarı","TL","number","odeme_oluru_toplam_tutarı", odemeler|sum(attribute='tutar'))}}
+      </div>
+      <div class="col-md-12 border-top pt-3">
+        {{m.input_group_id("Arama","fas fa-search","text","odemeler_ara","odemeler_ara","")}}
+      </div>
+  </div>
+</div>
+  
+<!-- ÖDEME VERİLERİ TABLOSU -->
+<div class="container-fluid">
+    <div class="g-2 pb-3 pt-1 border-bottom ">
+      <div class= "col">
+          <table id="odemeler" class="table table-hover table-striped table-sm" cellspacing="0" width="100%">
+            {{m.tablehead_9("","İsletmeler","Vergi No","Program - Destek","Karekod","Tarih","Tutar","Durum","İşlemler")}}
+            <tbody>
+            {% for odeme in odemeler|sort(reverse=true, attribute="tarih") %}     
+                <tr>
+                  <th>{{loop.index}}</th>
+                  <td style="font-size:small">{{odeme.unvan}}</td>
+                  <td>{{odeme.vergi}}</td>
+                  <td style="font-size:small">{{odeme.program_ismi}} - {{odeme.destek_ismi}}</td>
+                  <td>{{odeme.karekod}}</td>
+                  <td>{{odeme.tarih.strftime('%d.%m.%Y')}}</td>
+                  <td>{{"{:,.2f} TL".format(odeme.tutar)}}</td>
+                  <td>{{odeme.durum}}</td>
+                  <td>
+                    <div class="btn-group" role="group" aria-label="odeme-islem">
+                      <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#odeme{{odeme.id}}"><span class="fas fa-pen"></button>
+                      {{m.sil(odeme.id,"odemeareadelete",url_for('main.odeme_verisi_sil', durum=defaults.durum, program=defaults.program, destek=defaults.destek, firm=defaults.isletme, odeme_id=odeme.id))}}
+                    </div> 
+                  </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+          </table> 
+        </div>
+      </div>
+</div>
+
+<!-- ÖDEME GÜNCELLEME MODAL -->
+{% for odeme in odemeler %}
+<div class="modal fade" id="odeme{{odeme.id}}" tabindex="-1" role="dialog" aria-labelledby="#odemeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {{m.model_header("Ödeme Guncelle","odemeModalLabel")}}
+        <form action="{{(url_for('main.odeme_verisi_guncelle', durum=defaults.durum, program=defaults.program, destek=defaults.destek, firm=defaults.isletme, odeme_id=odeme.id))}}" method="POST">
+          {% call m.select_modal("Destekler","odeme-destek-guncelle") %}
+              {% for destek in defaults.destekler %}
+                  <option value="{{destek.isim}}" {{'selected' if destek.isim==odeme.destek_ismi}}>
+                      {{destek.isim}}
+                  </option>
+              {% endfor %}
+          {% endcall %}  
+          {{m.input_group_modal("Destek","text","odeme-destek-guncelle",odeme.destek_ismi)}}
+          {{m.input_group_modal("Karekod","text","odeme-kadekod-guncelle",odeme.karekod)}}
+          {{m.input_group_modal("Tarih","date","odeme-tarih-guncelle",odeme.tarih)}}
+          {{m.input_group_modal_2("Tutar","TL","number","odeme-tutar-guncelle",odeme.tutar)}}
+          {% call m.select_modal("Durum","odeme-durum-guncelle") %}
+              <option value="ÖDENDİ" {{'selected' if odeme.durum=="ÖDENDİ"}}>ÖDENDİ</option>
+              <option value="BEKLEMEDE" {{'selected' if odeme.durum=="BEKLEMEDE"}}>BEKLEMEDE</option>
+          {% endcall %} 
+          {{m.button_resimsiz("GÜNCELLE")}}
+        </form>
+      {{m.model_kapanis()}}
+{% endfor %}
+
+<!-- TABLO JAVASCRIPT -->
+{% block script %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.js"></script>
+<script src="{{url_for ('static', filename='js/datatable.js')}}"></script>
+{% endblock script %}
+{% endblock body %}

@@ -1,0 +1,92 @@
+{% extends "layout.html" %} 
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.css"/>
+{% endblock head %}
+{% block title %}Diziler{% endblock title %}
+{% block body %}
+{% import "macros.html" as m %}
+{{m.ust_bilgi("Diziler","fas fa-icons")}}
+
+<!-- DİZİ EKLE -->
+<div class="container-fluid">
+  <div class="row">
+    <button type="submit" class="btn btn-outline-secondary btn-lg btn-block" data-toggle="modal" data-target="#diziekle"><i class="fas fa-plus"></i>Dizi Ekle</button>                                                
+    {{m.model_acilis("diziekle","dizilerModalLabel")}}
+      {{m.model_header("Dizi Ekle","dizilerModalLabel")}}
+        <form action="{{url_for('kisisel.dizi_ekle')}}" method="POST">
+          {{m.input_group_modal("İsim","text","diziisimekle","")}}
+          {{m.input_group_modal("Çıkış Tarihi","text","dizicikistarihiekle","")}}
+          {{m.input_group_modal("Tur","text","diziturekle","")}}
+          {{m.input_group_modal("Son İzlenen","text","dizisonizlenenekle","")}}
+          {{m.input_group_modal("IMDB Puanı","number","diziimdbpuaniekle","")}}
+          {{m.input_group_modal("IMDB Link","text","diziimdblinkekle","")}}
+          {{m.input_group_modal("Puanım","number","dizipuanimekle","")}}
+          {% call m.select_modal("Dizi Durum","dizidurumekle") %}
+            <option value="Devam Ediyor" selected>Devam Ediyor</option>
+            <option value="Tamamlandı" >Tamamlandı</option>
+          {% endcall %}
+          {{m.button_resimsiz("KAYDET")}}
+        </form>
+    {{m.model_kapanis()}}
+    <div class="col mt-4">
+      {{m.input_group_id("Arama","fas fa-search","text","dizi_ara","dizi_ara","")}}
+    </div>
+  </div>
+</div>
+
+<!-- DİZİ BİLGİLERİ TABLOSU -->
+<div class="container-fluid">
+  <div class="row">
+    <div class= "col-md-12 mt-2">
+      <table id="diziler" class="table table-hover table-striped table-sm" cellspacing="0" width="100%">
+        {{m.tablehead_10("","İsim","Çıkış Tarihi","Tur","Son İzlenen","IMDB Puanı","IMDB Link","Puanım","İzleme Durumu","İşlemler")}}
+        <tbody>  
+          {% for dizi in diziler|sort(reverse=true, attribute="cikis_tarihi") %}  
+          <tr>
+            <th>{{loop.index}}</th>
+            <th>{{dizi.isim}}</th>
+            <td>{{dizi.cikis_tarihi}}</td>
+            <td>{{dizi.tur}}</td>
+            <td>{{dizi.son_izlenen}}</td>
+            <td>{{dizi.imdb_puani}}</td>
+            <td>
+                <a type="button" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener noreferrer" href="{{dizi.imdb_link}}"><span class="fab fa-imdb"></span></a>
+            </td>
+            <td>{{dizi.mehmet_puan}}</td>
+            <td>{{dizi.ddurum}}</td>
+            <td style="text-align:center">
+              <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#myOutput{{dizi.id}}"><span class="fas fa-pen"></button>                   
+              <div class="modal fade" id="myOutput{{dizi.id}}" tabindex="-1" role="dialog" aria-labelledby="dizilerguncelModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    {{m.model_header("Dizi Güncelle","dizilerguncelModalLabel")}}
+                      <form action="{{url_for('kisisel.dizi_guncelle', dizi_id=dizi.id)}}" method="POST">
+                        {{m.input_group_modal("İsim","text","diziisimguncelle", dizi.isim)}}
+                        {{m.input_group_modal("Çıkış Tarihi","text","dizicikistarihiguncelle", dizi.cikis_tarihi)}}
+                        {{m.input_group_modal("Tur","text","diziturguncelle", dizi.tur)}}
+                        {{m.input_group_modal("Son İzlenen","text","dizisonizlenenguncelle", dizi.son_izlenen)}}
+                        {{m.input_group_modal("IMDB Puanı","number","diziimdbpuaniguncelle", dizi.imdb_puani)}}
+                        {{m.input_group_modal("IMDB Link","text","diziimdblinkguncelle", dizi.imdb_link)}}
+                        {{m.input_group_modal("Puanım","number","dizipuanimguncelle", dizi.mehmet_puan)}}
+                        {% call m.select_modal("Dizi Durum","dizidurumguncelle") %}
+                          <option value="Devam Ediyor" {{'selected' if dizi.ddurum == "Devam Ediyor" }}>Devam Ediyor</option>
+                          <option value="Tamamlandı" {{'selected' if dizi.ddurum == "Tamamlandı" }}>Tamamlandı</option>
+                        {% endcall %}
+                        {{m.button_resimsiz("GÜNCELLE")}}
+                      </form>
+                    {{m.model_kapanis()}}
+                  {{m.sil(dizi.id,"diziareadelete",url_for('kisisel.dizi_sil', dizi_id=dizi.id))}}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table> 
+    </div>
+  </div>
+</div>
+<!-- TABLO JAVASCRIPT -->
+{% block script %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.js"></script>
+<script src="{{url_for ('static', filename='js/datatable.js')}}"></script>
+{% endblock script %}
+{% endblock body %}

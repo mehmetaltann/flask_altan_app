@@ -1,0 +1,350 @@
+{% extends "layout.html" %}
+{% block title %}İşletme{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+<!-- BAŞLIK -->
+{{m.ust_bilgi("İşletme","fas fa-industry")}}
+
+<!-- İŞLETME ARAMA -->
+<form class="row g-2 pb-3 border-bottom" action="{{url_for('main.isletme_verisi_al')}}" method="POST">
+    <div class="col-md-2 align-self-center">
+        <h5>İşletme Ara</h5>
+    </div>
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-md-4">
+                {{m.input_group("Unvan","text","unvan_ara","")}}
+            </div>
+            <div class="col-md-4">
+                {{m.input_group("Vergi Numarası","text","vergi_no_ara","")}}
+            </div>
+            <div class="col-md-2">
+                {{m.input_group("ID","number","isletme_id_ara","")}}
+            </div>
+            <div class="col-md-2">
+                {{m.button("Ara","fas fa-search")}}
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- İŞLETME BİLGİLERİ -->
+<form class="row g-2 pb-4 border-bottom" action="{{url_for('main.isletme_verisi_ekle')}}" method="POST">
+    <div class="col-md-12 pt-2">
+        <h5>İşletmenin Bilgileri</h5>
+    </div>
+    <div class="col-md-7">
+        {{m.input_group("Unvan","text","unvan",isletme.unvan)}}
+    </div>
+    <div class="col-md-3">
+        {{m.input_group("Vergi Numarası","number","vergi_no",isletme.vergi)}}
+    </div>
+    <div class="col-md-2">
+        {{m.input_group("ID","number","isletme_id",isletme.id)}}
+    </div>
+    <div class="col-md-7">
+        {% call m.select("Sektör","sektor") %}
+        {% for sektor in sektorler %}
+        <option value="{{sektor.isim}}" {{'selected' if sektor.isim==isletme.sektor_ismi }}>{{sektor.isim}}</option>
+        {% endfor %}
+        {% endcall %}
+    </div>
+    <div class="col-md-3">
+        {{m.input_group("Yetkili","text","yetkili",isletme.yetkili)}}
+    </div>
+    <div class="col-md-2">
+        {% call m.select("Tür","isletme_tur") %}
+        <option value='Şahıs' {{'selected' if isletme.tur=="Şahıs" }}>Şahıs</option>
+        <option value='Limited' {{'selected' if isletme.tur=="Limited" }}>Limited</option>
+        <option value='Anonim' {{'selected' if isletme.tur=="Anonim" }}>Anonim</option>
+        {% endcall %}
+    </div>
+    <div class="col-md-7">
+        <div class="input-group mb-1">
+            <span class="input-group-text">E-Posta</span>
+            <input type="email" class="form-control" name="is_mail" value="{{isletme.mail}}">
+            <div class="input-group-append">
+                <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#mailGonder"
+                    style="background-color: #e9ecef;"><i class="fas fa-envelope"></i>Mail Gonder</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        {{m.input_group("Telefon-1","number","tel-1",isletme.tel1)}}
+    </div>
+    <div class="col-md-2">
+        {{m.input_group("Bilgi","text","bilgi",isletme.bilgi)}}
+    </div>
+    <div class="col-md-7">
+        {{m.input_group("Adres","text","adres",isletme.adres)}}
+    </div>
+    <div class="col-md-3">
+        {{m.input_group("Telefon-2","number","tel-2",isletme.tel2)}}
+    </div>
+    <div class="col-md-2">
+        {% call m.select("Durum","durum") %}
+        <option value="Aktif" {{'selected' if isletme.durum=="Aktif" }}>Aktif</option>
+        <option value="Pasif" {{'selected' if isletme.durum=="Pasif" }}>Pasif</option>
+        {% endcall %}
+    </div>
+    <div class="col-md-7">
+        {% call m.select("Son Kayıtlı Kobi Beyannamesi","son_kobi_beyan") %}
+        <option value=2020 {{'selected' if isletme.bey_yil==2020}}>2020</option>
+        <option value=2021 {{'selected' if isletme.bey_yil==2021}}>2021</option>
+        <option value=2018 {{'selected' if isletme.bey_yil==2018}}>2018</option>
+        <option value=2019 {{'selected' if isletme.bey_yil==2019}}>2019</option>
+        <option value="YOK" {{'selected' if not isletme.bey_yil }}>YOK</option>
+        {% endcall %}
+    </div>
+    <div class="col-md-3">
+        {{m.input_group("Satış","number","bey_sat",isletme.bey_sat)}}
+    </div>
+    <div class="col-md-2">
+        {{m.input_group("Çalışan Sayısı","text","bey_cal",isletme.bey_cal)}}
+    </div>
+    <div class="col-md-4 mt-3">
+        {{m.button("İşletme Ekle / Güncelle","fas fa-plus")}}
+    </div>
+    {% if isletme %}
+    <div class="col-md-4 mt-3">
+        {{m.button_target("Proje Ekle", "fas fa-plus", "modal", "#projeEkle")}}
+    </div>
+    <div class="col-md-4 mt-3">
+        {{m.button_target("Odeme Ekle", "fas fa-plus", "modal", "#odemeEkle")}}
+    </div>
+</form>
+
+<!-- PROJE ve ÖDEME BİLGİLERİ TABLOSU -->
+<div class="row g-2 pb-2">
+    <div class="pt-3">
+        <h5>İşletmenin Program Bilgileri</h5>
+    </div>
+    {% if isletme.projeler %}
+    <div class="container">
+        <div class="col-md-12">
+            <table class="table table-hover table-sm">
+                {{m.tablehead_9("#","İsim","Başlama Tarihi","Süre","Tamamlanma Tarihi","Takip Tarihi","Durum","Toplam Ödeme","İşlemler")}}
+                <tbody>
+                    {% for proje in isletme.projeler|sort(reverse=true, attribute="baslama_tarihi") %}
+                    <tr data-toggle="collapse" data-target="#de{{proje.id}}">
+                        <th>{{loop.index}}</th>
+                        <th>{{proje.program_ismi}}</th>
+                        <td>{{proje.baslama_tarihi.strftime('%d.%m.%Y')}}</td>
+                        <td>{{proje.sure}}</td>
+                        <td>{{proje.tamamlanma_tarihi.strftime('%d.%m.%Y')}}</td>
+                        {% set kalan_gun = (proje.takip_tarihi - today).days%}
+                        <td>{% if kalan_gun > 2000 %}Yok{% else %}{{proje.takip_tarihi.strftime('%d.%m.%Y')}}{% endif %}</td>
+                        <td>{{proje.durum}}</td>
+                        <td>{{"{:,.2f} TL".format(proje.odeme_toplami)}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="proje-islem">
+
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal"
+                                    data-target="#projeler{{proje.id}}"><span class="fas fa-pen"></button>
+
+                                <div class="modal fade" id="projeler{{proje.id}}" tabindex="-1" role="dialog"
+                                    aria-labelledby="#projegunModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            {{m.model_header("Proje Guncelle","projegunModalLabel")}}
+                                            {{m.input_group_modal_readonly("","text","isletme-program-ismi", proje.program_ismi)}}
+                                            <form
+                                                action="{{url_for('main.isletme_proje_verisi_guncelle', isletme_id = isletme.id, proje_id = proje.id)}}"
+                                                method="POST">
+                                                {{m.input_group_modal("Başlama Tarihi","date","projeler-baslamatarihi-guncelle", proje.baslama_tarihi)}}
+                                                {{m.input_group_modal_2("Süre","Ay","number","projeler-sure-guncelle",proje.sure)}}
+                                                {{m.input_group_modal("Tamamlanma Tarihi","date","projeler-tamamlanmatarihi-guncelle", proje.tamamlanma_tarihi)}}
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text">Takip Tarihi</span>
+                                                    <input type="date" class="form-control" name="projeler-takiptarihi-guncelle" value={{proje.takip_tarihi}}>
+                                                    <div >
+                                                      <select class="form-select" name="varyok3">
+                                                        <option value="var">Var</option>
+                                                        <option value="yok">Yok</option>
+                                                      </select>
+                                                    </div>
+                                                    
+                                                  </div>
+                                                {{m.input_group_modal_not_required("İzleyici","text","projeler-izleyici-guncelle", proje.izleyici)}}
+                                                {{m.input_group_modal_not_required("Koordinatör","text","projeler-koordinator-guncelle", proje.koordinator)}}
+                                                {{m.input_group_modal_not_required("Notlar","text","projeler-notlar-guncelle", proje.notlar)}}
+                                                {% call m.select_modal("İzleme","projeler-izleme-guncelle") %}
+                                                <option value="Yapıldı" {{'selected' if proje.izleme=="Yapıldı" }}>
+                                                    Yapıldı</option>
+                                                <option value="Yapılmadı" {{'selected' if proje.izleme=="Yapılmadı" }}>
+                                                    Yapılmadı</option>
+                                                {% endcall %}
+                                                {% call m.select_modal("Durum","projeler-durum-guncelle") %}
+                                                <option value="Devam Ediyor"
+                                                    {{'selected' if proje.durum=="Devam Ediyor" }}>Devam Ediyor</option>
+                                                <option value="Başarıyla Tamamlandı"
+                                                    {{'selected' if proje.durum=="Başarıyla Tamamlandı" }}> Başarıyla
+                                                    Tamamlandı</option>
+                                                <option value="Başarısız Tamamlandı"
+                                                    {{'selected' if proje.durum=="Başarısız Tamamlandı" }}>Başarısız
+                                                    Tamamlandı</option>
+                                                <option value="Durduruldu" {{'selected' if proje.durum=="Durduruldu" }}>
+                                                    Durduruldu</option>
+                                                <option value="Bilgi Yok" {{'selected' if proje.durum=="Bilgi Yok" }}>
+                                                    Bilgi Yok</option>
+                                                {% endcall %}
+                                                {{m.button_resimsiz("GÜNCELLE")}}
+                                            </form>
+                                            {{m.model_kapanis()}}
+                                            {{m.sil(proje.id,"projeisareadelete",url_for('main.isletme_proje_verisi_sil', isletme_id=isletme.id, proje_id=proje.id))}}
+
+                        </td>
+                    </tr>
+                    {% for odeme in proje.odemeler %}
+                    <tr>
+                        <td colspan="7" class="hiddenRow">
+                            <div class="col-md-10 collapse" id="de{{proje.id}}">
+                                    <table class="table w-auto small align-middle">
+                                        <tbody>
+                                            <tr>
+                                                <td class="col-md-4">{{odeme.destek_ismi}}</td>
+                                                <td class="col-md-1">{{odeme.karekod}}</td>
+                                                <td class="col-md-2">{{odeme.tarih.strftime('%d.%m.%Y')}}</td>
+                                                <td class="col-md-2">{{"{:,.2f} TL".format(odeme.tutar)}}</td>
+                                                <td class="col-md-1">{{odeme.durum}}</td>
+                                                <td class="col-md-1">
+                                                    <div class="btn-group" role="group" aria-label="odeme-islem">
+
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                            data-toggle="modal"
+                                                            data-target="#odemeler{{odeme.id}}"><span
+                                                                class="fas fa-pen"></button>
+                                                        <div class="modal fade" id="odemeler{{odeme.id}}" tabindex="-1"
+                                                            role="dialog" aria-labelledby="#odemegunModalLabel"
+                                                            aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    {{m.model_header("Ödeme Güncelle","odemegunModalLabel")}}
+                                                                        {{m.input_group_modal_readonly("","text","program-odeme-ismi", proje.program_ismi)}}
+                                                                        <form
+                                                                            action="{{url_for('main.isletme_odeme_verisi_guncelle', isletme_id = isletme.id, odeme_id=odeme.id)}}"
+                                                                            method="POST">
+                                                                            {% call m.select_modal("Destekler","odeme-destek-guncelle") %}
+                                                                            {% for destek in destekler %}
+                                                                            <option value="{{destek.isim}}"
+                                                                                {{'selected' if destek.isim==odeme.destek_ismi}}>
+                                                                                {{destek.isim}}
+                                                                            </option>
+                                                                            {% endfor %}
+                                                                            {% endcall %}
+                                                                            {{m.input_group_modal("Karekod","text","odeme-kadekod-guncelle", odeme.karekod)}}
+                                                                            {{m.input_group_modal("Tarih","date","odeme-tarih-guncelle", odeme.tarih)}}
+                                                                            {{m.input_group_modal_2("Tutar","TL","number","odeme-tutar-guncelle", odeme.tutar)}}
+                                                                            {% call m.select_modal("Durum","odeme-durum-guncelle") %}
+                                                                            <option value="ÖDENDİ"
+                                                                                {{'selected' if odeme.durum=="ÖDENDİ"}}>
+                                                                                ÖDENDİ</option>
+                                                                            <option value="BEKLEMEDE"
+                                                                                {{'selected' if odeme.durum=="BEKLEMEDE"}}>
+                                                                                BEKLEMEDE</option>
+                                                                            {% endcall %}
+                                                                            {{m.button_resimsiz("GÜNCELLE")}}
+                                                                        </form>
+                                                                    {{m.model_kapanis()}}
+                                                            {{m.sil(odeme.id,"odemeareadelete",url_for('main.isletme_odeme_verisi_sil', isletme_id=isletme.id, proje_id=proje.id, odeme_id = odeme.id))}}
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- PROJE EKLE - AÇILIR MENÜ -->
+{% if isletme %}
+{{m.model_acilis("projeEkle","projeModalLabel")}}
+    {{m.model_header("Proje Ekle","projeModalLabel")}}
+        <form action="{{url_for('main.proje_verisi_ekle', isletme_id = isletme.id)}}" method="POST">
+            {% call m.select_modal("İşletme","proje-isletme-ekle") %}
+            <option value="{{isletme.id}}" selected>{{isletme.unvan}}</option>
+            {% endcall %}
+            {% call m.select_modal("Proje","proje_program_ekle") %}
+            {% for program in programlar %}
+            <option value="{{program.isim}}"
+                {{'selected' if program.isim=="İşletme Geliştirme Destek Programı" }}>{{program.isim}}</option>
+            {% endfor %}
+            {% endcall %}
+            {{m.input_group_modal("Başlama Tarihi","date","baslama-tarihi-ekle", "")}}
+            {{m.input_group_modal_2("Süre","Ay","number","proje-sure", "")}}
+            {{m.input_group_modal("Tamamlanma Tarihi","date","tamamlanma-tarihi-ekle", "")}}
+            <div class="input-group mb-3">
+                <span class="input-group-text">Takip Tarihi</span>
+                <input type="date" class="form-control" name="takip-tarihi-ekle" value="">
+                <div >
+                  <select class="form-select" name="varyok2">
+                    <option value="var">Var</option>
+                    <option value="yok">Yok</option>
+                  </select>
+                </div>
+            </div>
+            {{m.input_group_modal_not_required("İzleyici","text","izleyici-ekle", "")}}
+            <input type="hidden" name="proje-durum" id="proje-durum" value="Devam Ediyor">
+            {{m.button_resimsiz("KAYDET")}}
+        </form>
+{{m.model_kapanis()}}
+{% endif %}
+
+<!-- ÖDEME EKLE - AÇILIR MENÜ -->
+{% if isletme.projeler %}
+{{m.model_acilis("odemeEkle","odemeModalLabel")}}
+    {{m.model_header("Ödeme Ekle","odemeModalLabel")}}
+        <form action="{{url_for('main.odeme_verisi_ekle', isletme_id = isletme.id)}}" method="POST">
+            {% call m.select_modal("İşletme","odeme-isletme-ekle") %}
+            <option value="{{isletme.id}}" selected>{{isletme.unvan}}</option>
+            {% endcall %}
+            {% call m.select_modal("Projeler","proje_ekle") %}
+            {% for proje in isletme.projeler %}
+            <option value="{{proje.id}}" selected>{{proje.id}}-{{proje.program_ismi}} - {{proje.baslama_tarihi}}
+            </option>
+            {% endfor %}
+            {% endcall %}
+            {% call m.select_modal("Destekler","destek_ekle") %}
+            {% for destek in destekler %}
+            <option value="{{destek.isim}}" {{'selected' if destek.isim=="Nitelikli Eleman İstihdam Desteği" }}>
+                {{destek.isim}}</option>
+            {% endfor %}
+            {% endcall %}
+            {{m.input_group_modal("Karekod","text","kadekod-ekle", "")}}
+            {{m.input_group_modal("Tarih","date","odeme-tarih-ekle", "")}}
+            {{m.input_group_modal_2("Tutar","TL","number","tutar-ekle", "")}}
+            {% call m.select_modal("Durum","durum_ekle") %}
+            <option value='BEKLEMEDE'>BEKLEMEDE</option>
+            <option value='ÖDENDİ'>ÖDENDİ</option>
+            {% endcall %}
+            {{m.button_resimsiz("KAYDET")}}
+        </form>
+{{m.model_kapanis()}}
+{% endif %}
+
+<!-- MAİL GÖNDER - AÇILIR MENÜ -->
+{% if isletme %}
+{{m.model_acilis("mailGonder","mailModalLabel")}}
+    {{m.model_header("E-Mail Gönder","mailModalLabel")}}
+        <form action="{{url_for('main.isletmeye_mail_gonder', isletme_id = isletme.id)}}" method="POST">
+            {{m.input_group_modal_readonly("Alıcı","text","isletme-mail-adresi", isletme.mail)}}
+            {{m.input_group_modal("Konu","text","isletme-mail-konu", "")}}
+            <div class="input-group mb-3">
+                <span class="input-group-text">İçerik</span>
+                <textarea class="form-control" name="isletme-mail-icerik" rows="6" wrap="soft"></textarea>
+            </div>
+            {{m.button_resimsiz("GÖNDER")}}
+        </form>
+{{m.model_kapanis()}}
+{% endif %}
+
+{% endblock body %}

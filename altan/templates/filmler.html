@@ -1,0 +1,84 @@
+{% extends "layout.html" %} 
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.css"/>
+{% endblock head %}
+{% block title %}Filmler{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+{{m.ust_bilgi("Filmler","fas fa-video")}}
+
+<!-- FİLM EKLE -->
+<div class="container-fluid">
+  <div class="row">
+    <button type="submit" class="btn btn-outline-secondary btn-lg btn-block" data-toggle="modal" data-target="#filmekle"><i class="fas fa-plus"></i>Film Ekle</button>                                                 
+    {{m.model_acilis("filmekle","filmlerModalLabel")}}  
+      {{m.model_header("Film Ekle","filmlerModalLabel")}}
+        <form action="{{url_for('kisisel.film_ekle')}}" method="POST">
+          {{m.input_group_modal("İsim","text","filmisimekle","")}}
+          {{m.input_group_modal("Vizyon Yılı","text","filmvizyonekle","")}}
+          {{m.input_group_modal("Tur","text","filmturekle","")}}
+          {{m.input_group_modal("Yönetmen","text","filmyonetmenekle","")}}
+          {{m.input_group_modal("IMDB Puanı","number","filmimdbpuaniekle","")}}
+          {{m.input_group_modal("IMDB Link","text","filmimdblinkekle","")}}
+          {{m.input_group_modal("Puanım","number","filmpuanimekle","")}}
+          {{m.button_resimsiz("KAYDET")}}
+        </form>
+      {{m.model_kapanis()}}
+    <div class="col mt-4">
+      {{m.input_group_id("Arama","fas fa-search","text","film_ara","film_ara","")}}
+    </div>
+  </div>
+</div>
+
+<!-- FİLM BİLGİLERİ TABLOSU -->
+<div class="container-fluid">
+  <div class="row">
+    <div class= "col-md-12 mt-2">
+      <table id="filmler" class="table table-hover table-striped table-sm" cellspacing="0" width="100%">
+      {{m.tablehead_9("","İsim","Vizyon Yılı","Tür","Yönetmen","IMDB Puanı","IMDB Link","Puanım","İşlemler")}}
+        <tbody>  
+        {% for film in filmler|sort(reverse=true, attribute="cikis_tarihi") %}  
+          <tr>
+            <th>{{loop.index}}</th>
+            <th>{{film.isim}}</th>
+            <td>{{film.cikis_tarihi}}</td>
+            <td style="font-size:small">{{film.tur}}</td>
+            <td>{{film.yonetmen}}</td>
+            <td>{{film.imdb_puani}}</td>
+            <td>
+                <a type="button" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener noreferrer" href="{{film.imdb_link}}"><span class="fab fa-imdb"></span></a>
+            </td>
+            <td>{{film.mehmet_puan}}</td>
+            <td style="text-align:center">
+              <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#myOutput{{film.id}}"><span class="fas fa-pen"></button>                    
+                <div class="modal fade" id="myOutput{{film.id}}" tabindex="-1" role="dialog" aria-labelledby="#filmgunModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      {{m.model_header("Film Güncelle","filmgunModalLabel")}}
+                        <form action="{{url_for('kisisel.film_guncelle', film_id=film.id)}}" method="POST">
+                            {{m.input_group_modal("İsim","text","filmisimguncelle", film.isim)}}
+                            {{m.input_group_modal("Vizyon Yılı","text","filmvizyonguncelle", film.cikis_tarihi)}}
+                            {{m.input_group_modal("Tur","text","filmturguncelle", film.tur)}}
+                            {{m.input_group_modal("Yönetmen","text","filmyonetmenguncelle", film.yonetmen)}}
+                            {{m.input_group_modal("IMDB Puanı","number","filmimdbpuaniguncelle", film.imdb_puani)}}
+                            {{m.input_group_modal("IMDB Link","text","filmimdblinkguncelle", film.imdb_link)}}
+                            {{m.input_group_modal("Puanım","number","filmpuanimguncelle", film.mehmet_puan)}}
+                            {{m.button_resimsiz("GÜNCELLE")}}
+                        </form>
+                      {{m.model_kapanis()}}
+                  {{m.sil(film.id,"filmareadelete",url_for('kisisel.film_sil', film_id=film.id))}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table> 
+    </div>
+  </div>
+</div>
+
+<!-- TABLO JAVASCRIPT -->
+{% block script %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.js"></script>
+<script src="{{url_for ('static', filename='js/datatable.js')}}"></script>
+{% endblock script %}
+{% endblock body %}

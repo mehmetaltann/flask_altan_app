@@ -1,0 +1,115 @@
+{% extends "layout.html" %} 
+
+{% block body %}
+
+{{m.ust_bilgi("Parametreler","")}}
+
+<div class="row g-2 pb-2">
+
+  <div class="col-md-2">
+    <h6 class="pb-4">Kullanıcı İşlemleri</h6>
+    <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#kullaniciekle"><i class="fas fa-plus"></i>Ekle</button>
+  </div>
+
+  <div class="col-md-5">
+    <h6 class="position-absolute">Program İsimleri</h6>
+    <div class="d-flex d-flex justify-content-around">
+      <button type="button" class="btn-outline-secondary" data-toggle="modal" data-target="#programekle"><i class="fas fa-plus"></i>Ekle</button>
+    </div>
+    <table class="table w-auto small align-middle">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>İsim</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for program in defaults.programlar %}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{program.isim}}</td>
+          <td>
+            <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#my{{program.id}}"><span class="fas fa-pen"></button>                   
+              <div class="modal fade" id="my{{program.id}}" tabindex="-1" role="dialog" aria-labelledby="#programgunModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    {{m.model_header("Program Güncelle","programgunModalLabel")}}
+                      <form action="{{url_for('giris.parametreler_program_guncelle', program_id=program.id)}}" method="POST">
+                        {{m.input_group_modal("Program Adı","text","programguncelle", program.isim)}}
+                        {{m.button_resimsiz("GÜNCELLE")}}
+                      </form>
+                    {{m.model_kapanis()}}
+              {{m.sil(program.id,"programareadelete",url_for('giris.parametreler_program_sil', program_id=program.id))}}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-md-5">
+    <h6 class="position-absolute">Destek İsimleri</h6>
+    <div class="d-flex justify-content-around">
+      <button type="button" class="btn-outline-secondary" data-toggle="modal" data-target="#destekekle"><i class="fas fa-plus"></i>Ekle</button>
+    </div>
+    <table class="table w-auto small align-middle">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>İsim</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
+      <tbody> 
+      {% for destek in defaults.destekler %}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{destek.isim}}</td>
+          <td>
+            <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#mi{{destek.id}}"><span class="fas fa-pen"></button>                   
+              <div class="modal fade" id="mi{{destek.id}}" tabindex="-1" role="dialog" aria-labelledby="#destekgunModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    {{m.model_header("Destek Güncelle","destekgunModalLabel")}}
+                      <form action="{{url_for('giris.parametreler_destek_guncelle', destek_id=destek.id)}}" method="POST">
+                        {{m.input_group_modal("Destek Adı","text","destekguncelle", destek.isim)}}
+                        {{m.button_resimsiz("GÜNCELLE")}}
+                      </form>
+                    {{m.model_kapanis()}}
+              {{m.sil2(destek.id,"destekareadelete",url_for('giris.parametreler_destek_sil', destek_id=destek.id))}}          
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PROGRAM EKLEME MODAL -->
+{{m.model_acilis("programekle","programModalLabel")}}
+  {{m.model_header("Program Ekle","programModalLabel")}}
+    <form action="{{url_for('giris.parametreler_program_ekle', sayi = defaults.sayi)}}" method="POST">
+      {{m.input_group_modal("Program İsmi","text","programisimekle","")}}
+      {{m.button_resimsiz("KAYDET")}}
+    </form>
+{{m.model_kapanis()}}
+<!-- DESTEK EKLEME MODAL -->{{m.model_acilis("destekekle","destekModalLabel")}}
+  {{m.model_header("Destek Ekle","destekModalLabel")}}
+    <form action="{{url_for('giris.parametreler_destek_ekle')}}" method="POST">
+      {{m.input_group_modal("Destek İsmi","text","destekisimekle","")}}
+      {{m.button_resimsiz("KAYDET")}}
+    </form>
+{{m.model_kapanis()}}
+<!-- KULLANICI EKLEME MODAL -->
+{{m.model_acilis("kullaniciekle","kullaniciModalLabel")}}
+  {{m.model_header("Kullanıcı Ekle","kullaniciModalLabel")}}
+    <form action="{{url_for('giris.parametreler_kullanici_ekle')}}" method="POST">
+      {{m.input_group_modal("Kullanıcı İsmi","text","kullaniciisimekle","")}}
+      {{m.input_group_modal("Kullanıcı Şifresi","text","kullanicisifreekle","")}}
+      {{m.button_resimsiz("KAYDET")}}
+    </form>
+{{m.model_kapanis()}}
+
+
+{% endblock body %}

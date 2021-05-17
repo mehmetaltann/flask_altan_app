@@ -1,0 +1,88 @@
+{% extends "layout.html" %} 
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.css"/>
+{% endblock head %}
+{% block title %}Kitaplar{% endblock %}
+{% block body %}
+{% import "macros.html" as m %}
+{{m.ust_bilgi("Kitaplar","fas fa-book-open")}}
+
+<!-- KİTAP EKLE -->
+<div class="container-fluid">
+  <div class="row">
+      <button type="submit" class="btn btn-outline-secondary btn-lg btn-block" data-toggle="modal" data-target="#kitapekle"><i class="fas fa-plus"></i> Kitap Ekle</button>                    
+      {{m.model_acilis("kitapekle","kitaplarModalLabel")}}
+        {{m.model_header("Kitap Ekle","kitaplarModalLabel")}}
+          <form action="{{url_for('kisisel.kitap_ekle')}}" method="POST">
+              {{m.input_group_modal("ISBN","text","kitapisbnekle","")}}
+              {{m.input_group_modal("İsim","text","kitapisimekle", "")}}
+              {{m.input_group_modal("Yazar","text","kitapyazarekle", "")}}
+              {{m.input_group_modal("Tur","text","kitapturekle", "")}}
+              {{m.input_group_modal("Yayın Bilgisi","text","kitapyayinbilgisiekle", "")}}
+              {{m.input_group_modal("Alınma Yeri","text","kitapalinmayeriekle", "")}}
+              {{m.input_group_modal("Alınma Tarihi","date","kitapalinmatarihiekle", "")}}
+              {{m.input_group_modal("Okunma Durumu","text","kitapokunmadurumuekle", "Okunmadı")}}
+              {{m.button_resimsiz("KAYDET")}}
+          </form>
+      {{m.model_kapanis()}}
+      <div class="col mt-4">
+        {{m.input_group_id("Arama","fas fa-search","text","kitap_ara","kitap_ara","")}}
+      </div>
+  </div>
+</div>
+
+<!-- KİTAP BİLGİLERİ TABLOSU -->
+<div class="container-fluid">
+  <div class="row">
+    <div class= "col-md-12 mt-2">
+      <table id="kitaplar" class="table table-hover table-striped table-sm" cellspacing="0" width="100%">
+        {{m.tablehead_9("","İsim","Yazar","Tür","Yayın Bilgisi","ISBN","Alınma","Okunma","İşlemler")}}
+        <tbody>  
+          {% for kitap in kitaplar|sort(reverse=true, attribute="alinma_tarihi") %}  
+          <tr>
+            <th>{{loop.index}}</th>
+            <th>{{kitap.isim}}</th>
+            <td>{{kitap.yazar}}</td>
+            <td>{{kitap.tur}}</td>
+            <td>{{kitap.yayin_bilgisi}}</td>
+            <td>{{kitap.isbn}}</td>
+            <td>{{kitap.alinma_tarihi.strftime('%d.%m.%Y')}} - {{kitap.alinma_yeri}}</td>
+            <td>{{kitap.okunma_durumu}}</td>
+            <td>
+                <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#myOutput{{kitap.id}}"><span class="fas fa-pen"></button>                        
+                  <div class="modal fade" id="myOutput{{kitap.id}}" tabindex="-1" role="dialog" aria-labelledby="^#kitapgunModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        {{m.model_header("Kitap Güncelle","kitapgunModalLabel")}}
+                          <form action="{{url_for('kisisel.kitap_guncelle', kitap_id=kitap.id)}}" method="POST">
+                            {{m.input_group_modal("ISBN","text","kitapisbnguncelle", kitap.isbn)}}
+                            {{m.input_group_modal("İsim","text","kitapisimguncelle", kitap.isim)}}
+                            {{m.input_group_modal("Yazar","text","kitapyazarguncelle", kitap.yazar)}}
+                            {{m.input_group_modal("Tur","text","kitapturguncelle", kitap.tur)}}
+                            {{m.input_group_modal("Yayın Bilgisi","text","kitapyayinbilgisiguncelle", kitap.yayin_bilgisi)}}
+                            {{m.input_group_modal("Alınma Yeri","text","kitapalinmayeriguncelle", kitap.alinma_yeri)}}
+                            {{m.input_group_modal("Alınma Tarihi","date","kitapalinmatarihiguncelle", kitap.alinma_tarihi)}}
+                            {% call m.select_modal("Okunma Durumu","kitapokunmadurumuguncelle") %}
+                              <option value="Tamamlandı" {{'selected' if kitap.okunma_durumu == "Tamamlandı" }}>Tamamlandı</option>
+                              <option value="Okunuyor" {{'selected' if kitap.okunma_durumu == "Okunuyor" }}>Okunuyor</option>
+                              <option value="Okundu" {{'selected' if kitap.okunma_durumu == "Okundu" }}>Okundu</option>
+                            {% endcall %}
+                            {{m.button_resimsiz("GÜNCELLE")}}
+                          </form>
+                        {{m.model_kapanis()}}
+                    {{m.sil(kitap.id,"kitapareadelete",url_for('kisisel.kitap_sil', kitap_id=kitap.id))}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table> 
+    </div>
+  </div>  
+</div>
+
+<!-- TABLO JAVASCRIPT -->
+{% block script %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/fc-3.3.2/fh-3.1.8/r-2.2.7/sc-2.0.3/sl-1.3.1/datatables.min.js"></script>
+<script src="{{url_for ('static', filename='js/datatable.js')}}"></script>
+{% endblock script %}
+{% endblock body %}

@@ -1,0 +1,228 @@
+{% macro ust_bilgi(konu,icon) -%}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2" style="color: rgb(82, 82, 82);"><i class="{{icon}}"></i>{{konu}}</h1>
+</div>
+{%- endmacro %}
+
+<!-- INPUTS -->
+{% macro input_group(isim,input_tipi,name,value) -%}
+<div class="input-group">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}">
+</div>
+{%- endmacro %}
+
+{% macro input_group_mb2(isim,input_tipi,name,value) -%}
+<div class="input-group mb-2">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}">
+</div>
+{%- endmacro %}
+
+{% macro input_group_2(isim,isim2,input_tipi,name,value) -%}
+<div class="input-group">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}">
+  <span class="input-group-text">{{isim2}}</span>
+</div>
+{%- endmacro %}
+
+{% macro input_group_2_readonly(isim,isim2,input_tipi,name,value) -%}
+<div class="input-group">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}" readonly>
+  <span class="input-group-text">{{isim2}}</span>
+</div>
+{%- endmacro %}
+
+{% macro input_group_modal(isim,input_tipi,name,value) -%}
+<div class="input-group mb-3">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}" required>
+</div>
+{%- endmacro %}
+
+{% macro input_group_modal_2(isim,isim2,input_tipi,name,value) -%}
+<div class="input-group mb-3">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}" required>
+  <span class="input-group-text">{{isim2}}</span>
+</div>
+{%- endmacro %}
+
+{% macro input_group_modal_not_required(isim,input_tipi,name,value) -%}
+<div class="input-group mb-3">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}">
+</div>
+{%- endmacro %}
+
+{% macro input_group_modal_not_required_2(isim,isim2,input_tipi,name,value) -%}
+<div class="input-group mb-3">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}">
+  <span class="input-group-text">{{isim2}}</span>
+</div>
+{%- endmacro %}
+
+{% macro input_group_modal_readonly(isim,input_tipi,name,value) -%}
+<div class="input-group mb-3">
+  <span class="input-group-text">{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" value="{{value}}" readonly>
+</div>
+{%- endmacro %}
+
+{% macro input_group_id(isim,ikon,input_tipi,name,id,value) -%}
+<div class="input-group">
+  <span class="input-group-text"><i class="{{ikon}}"></i>{{isim}}</span>
+  <input type="{{input_tipi}}" step="any" class="form-control" name="{{name}}" id="{{id}}" value="">
+</div>
+{%- endmacro %}
+
+<!-- BUTTONS -->
+
+{% macro button_resimsiz(isim) -%}
+<div class="d-grid gap-2 mx-auto">
+  <button type="submit" class="btn btn-outline-secondary">{{isim}}</button>
+</div>
+{%- endmacro %}
+
+{% macro button(isim,ikon) -%}
+<div class="d-grid gap-2 mx-auto">
+  <button type="submit" class="btn btn-outline-secondary"><i class="{{ikon}}"></i>{{isim}}</button>
+</div>
+{%- endmacro %}
+
+{% macro button_class(isim,ikon,class,type="submit") -%}
+<div class="d-grid gap-2 mx-auto">
+  <button type="{{type}}" class="{{class}}"><i class="fas fa-search"></i> {{isim}} </button>
+</div>
+{%- endmacro %}
+
+{% macro button_target(isim, ikon, data_toggle, data_target="") -%}
+<div class="d-grid gap-2 mx-auto">
+  <button type="button" class="btn btn-outline-secondary" data-toggle="{{data_toggle}}" data-target="{{data_target}}"><i class="{{ikon}}"></i>{{isim}}</button>
+</div>
+{%- endmacro %}
+
+<!-- ANCHORS -->
+{% macro anchor_tamamlama(value) -%}
+<a type="button" class="btn btn-outline-secondary btn-sm" href="{{value}}"><span class="fas fa-check-square"></span></a>
+{%- endmacro %}
+
+{% macro baglantilar_resimsiz_anchor(name,link) -%}
+  <a class="btn btn-outline-secondary" href="{{link}}"
+    role="button" target="_blank"> <h6>{{name}}</h6>
+  </a>
+{%- endmacro %}
+
+<!-- MODELS -->
+{% macro model_acilis(id,aria_label) -%}
+<div class="modal fade" id="{{id}}" tabindex="-1" role="dialog" aria-labelledby="#{{aria_label}}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+{%- endmacro %}
+
+{% macro model_header(value,id) -%}
+<div class="modal-header">
+  <h5 class="modal-title" id="{{id}}">{{value}}</h5>
+  <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+{%- endmacro %}
+
+{% macro model_kapanis() -%}
+</div></div></div></div>
+{%- endmacro %}
+
+
+<!-- SELECTS -->
+{% macro select(isim,name) -%}
+<div class="input-group">
+  <span class="input-group-text">{{isim}}</span>
+  <select class="form-select" name="{{name}}">
+    {{ caller() }}
+  </select>
+</div>
+{%- endmacro %}
+
+{% macro select_modal(isim,name) -%}
+<div class="input-group mb-3">
+  <span class="input-group-text">{{isim}}</span>
+  <select class="form-select" name="{{name}}">
+    {{ caller() }}
+  </select>
+</div>
+{%- endmacro %}
+
+<!-- TABLES -->
+{% macro tablehead_10(bir,iki,uc,dort,bes,alti,yedi,sekiz,dokuz,on) -%}
+<thead><tr>
+<th>{{bir}}</th><th>{{iki}}</th><th>{{uc}}</th><th>{{dort}}</th><th>{{bes}}</th>
+<th>{{alti}}</th><th>{{yedi}}</th><th>{{sekiz}}</th><th>{{dokuz}}</th><th>{{on}}</th>
+</tr></thead>
+{%- endmacro %}
+
+{% macro tablehead_9(bir,iki,uc,dort,bes,alti,yedi,sekiz,dokuz) -%}
+<thead><tr>
+<th>{{bir}}</th><th>{{iki}}</th><th>{{uc}}</th><th>{{dort}}</th><th>{{bes}}</th>
+<th>{{alti}}</th><th>{{yedi}}</th><th>{{sekiz}}</th><th>{{dokuz}}</th>
+</tr></thead>
+{%- endmacro %}
+
+{% macro tablehead_8(bir,iki,uc,dort,bes,alti,yedi,sekiz) -%}
+<thead><tr>
+<th>{{bir}}</th><th>{{iki}}</th><th>{{uc}}</th><th>{{dort}}</th><th>{{bes}}</th>
+<th>{{alti}}</th><th>{{yedi}}</th><th>{{sekiz}}</th>
+</tr></thead>
+{%- endmacro %}
+
+<!-- NAVIGATION LINKS -->
+{% macro nav_link(name,icon,link) -%}
+<li class="nav-item">
+  <a class="nav-link" href="{{link}}">
+    <i class="{{icon}}"></i>{{name}}</a>
+</li>
+{%- endmacro %}
+
+<!-- DELETE AND CONFİRMATION -->
+{% macro sil(target,areatarget,value) -%}
+<button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#ul{{target}}"><span class="fas fa-trash"></span></button>
+<div class="modal fade" id="ul{{target}}" tabindex="-1" role="dialog" aria-labelledby="#{{areatarget}}"
+    aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="{{areatarget}}">Kayıt Silinsin mi ?</h5>
+              <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="d-grid gap-2 mx-auto">
+                <a type="button" class="btn btn-outline-secondary" href="{{value}}">Sil</a>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">İptal</button>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+{% macro sil2(target,areatarget,value) -%}
+<button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#ut{{target}}"><span class="fas fa-trash"></span></button>
+<div class="modal fade" id="ut{{target}}" tabindex="-1" role="dialog" aria-labelledby="#{{areatarget}}"
+    aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="{{areatarget}}">Kayıt Silinsin mi ?</h5>
+              <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="d-grid gap-2 mx-auto">
+                <a type="button" class="btn btn-outline-secondary" href="{{value}}">Sil</a>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">İptal</button>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}

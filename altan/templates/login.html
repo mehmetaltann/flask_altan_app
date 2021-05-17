@@ -1,0 +1,30 @@
+{% extends "bootstrap/base.html" %}
+{% block head %} 
+{{super()}}
+<link rel="icon" type="image/png" href="{{url_for ('static', filename='img/favicon.ico')}}"/>
+<link href="{{url_for ('static', filename='css/login_page.css')}}" rel="stylesheet">
+{% endblock %}
+{% block title %}Altan Giriş{% endblock %}
+{% block content %}
+<body class="text-center">   
+ <main class="form-signin">
+   {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+   {% for category, message in messages %}
+   <div class="alert alert-{{ category }} text-center" role="alert" id="successMessage"> {{ message }}</div>
+   {% endfor %}{% endif %}{% endwith %}
+   <form method="POST" action="{{url_for('giris.login')}}">
+    <img class="profile-foto" src="https://lh3.googleusercontent.com/ogw/ADGmqu9GJQ87AyAJWtsgkV5k1K4G4mFkTQyxs2v1AX6TdA=s83-c-mo" alt="profile">
+    <hr>     
+    <label for="inputEmail" class="visually-hidden"> <span class="glyphicon glyphicon-user"></span> Kullanıcı Adı</label>
+    <input type="text" id="inputEmail" class="form-control" name="username" placeholder="Kullanıcı Adı" required autofocus>
+    <label for="inputPassword" class="visually-hidden" style="margin-top: 1.5rem;"> <span class="glyphicon glyphicon-lock"></span> Şifre</label>
+    <input type="password" id="inputPassword" class="form-control" name="password" placeholder="Şifre" required>
+    <button class="w-100 btn btn-lg btn-primary btn-block" type="submit" style="margin-top: 2rem;">Giriş</button>
+   </form>
+ </main>     
+</body>
+{% block scripts %}
+<script src="{{url_for ('static', filename='js/alert.js')}}"></script>
+{{super()}}
+{% endblock%}
+{% endblock %}

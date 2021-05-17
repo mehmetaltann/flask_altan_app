@@ -1,0 +1,268 @@
+{% extends "layout.html" %}
+{% block title %}Yatırım Takibi{% endblock %}
+{% block body %} 
+{% import "macros.html" as m %}
+
+<!-- YATIRIM EKLEME -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Yatırım Hesabı</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group me-2">
+      <a type="button" data-toggle="modal" data-target="#yatirimekle" class="btn btn-sm btn-outline-secondary">Yeni
+        Yatırım Ekle</a>
+      <a type="button" data-toggle="modal" data-target="#yatirimkaldir" class="btn btn-sm btn-outline-secondary">
+      Yatırım Kaldır</a>
+      <a type="button" data-toggle="modal" data-target="#yatirimgetir" class="btn btn-sm btn-outline-secondary">
+        Yatırım Getir</a>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+
+  <!-- TOPLAM YATIRIM -->
+  <div class="row g-2 pb-3 pt-3 border-bottom">
+      <div class="col-md-3 offset-md-3">
+          {{m.input_group_2_readonly("Toplam Yatırım","TL","number","toplamyatirim","")}}
+      </div>
+      <div class="col-md-3 ">
+          {{m.input_group_2_readonly("Toplam Getiri","TL","number","toplamgetiri","")}}
+      </div>
+  </div>
+
+  <!-- ALIŞ - SATIŞ EKLEME -->
+  <div class="row g-2 pb-5 pt-3 border-bottom">
+    <div class="col-md-6 offset-md-3">
+      <div class="d-grid gap-2 mx-auto">
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="submit" class="btn btn-outline-secondary btn-block" data-toggle="modal" data-target="#alis">
+            <i style="color: rgb(63, 248, 63);" class="fas fa-shopping-basket"></i>Alış
+          </button>
+          <button button type="submit" class="btn btn-outline-secondary btn-block" data-toggle="modal"
+            data-target="#satis">
+            <i style="color: salmon;" class="fas fa-money-bill-wave"></i>Satış
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- YATIRIM BİLGİLERİ -->
+  {% for row in yatirimlar|batch(2) %}
+  <div class="row g-2 pb-2">
+    {% for yatirim in row %}
+    <div class="col-md-6 border">
+      <div class="row g-2 p-4">
+        <div class="col-md-6">
+          <div class="col pb-2"><img src="{{yatirim.resim}}" class="img-fluid" alt="Responsive image"
+              style="max-width: 40%" /></div>
+          <div class="col">
+            <h5>{{yatirim.isim}}</h5>
+          </div>
+          <div class="col pb-2">
+            <h7 id="kisa_isim">{{yatirim.kisa}}</h7>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="col pb-2">
+            <h6>Miktar : {{yatirim.toplam_miktar}}</h6>
+          </div>
+          <div class="col pb-2">
+            <h6>Alış Tutarı : {{yatirim.toplam_tutar}}</h6>
+          </div>
+          <div class="col pb-2">
+            <h6 id="birim"> Birim Fiyat : {{"{:,.4f} TL".format(yatirim.birim_fiyat)}}</h6>
+          </div>
+          {% set toplam_alis = yatirim.toplam_miktar * yatirim.birim_fiyat %}
+          <div class="col pb-2">
+            <h6 class="nemesis">Değer : {{"{:,.2f} TL".format(toplam_alis)}}</h6>
+          </div>
+          {% set toplam_getiri = toplam_alis - yatirim.toplam_tutar%}
+          <div class="col pb-2">
+            {% if toplam_getiri < 0 %}
+            <h6 style="color:red" class="afrodit">Getiri : {{"{:,.2f} TL".format(toplam_getiri)}}</h6>
+            {% else %}
+            <h6 style="color:rgb(27, 172, 27)" class="afrodit">Getiri : {{"{:,.2f} TL".format(toplam_getiri)}}</h6>
+            {% endif %}
+          </div>
+        </div>
+        <div class="accordion accordion-flush col" id="yatirim_accordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+              <button style="padding: 0%;" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#yat{{yatirim.id}}" aria-expanded="true" aria-controls="collapseOne">
+                <h6>Hareketler</h5>
+              </button>
+            </h2>
+            <!-- Açılır - Kapanır Tablo -->
+            <div id="yat{{yatirim.id}}" class="accordion-collapse collapse" aria-labelledby="headingOne"
+              data-bs-parent="#yatirim_accordion">
+              <div class="accordion-body">
+                <table class="table w-auto small align-middle">
+                  <thead>
+                    <tr>
+                      <th class="col-md-1">#</th>
+                      <th class="col-md-2">Tarih</th>
+                      <th class="col-md-2">Miktar</th>
+                      <th class="col-md-2">Birim Fiyat</th>
+                      <th class="col-md-2">Toplam Tutar</th>
+                      <th class="col-md-1">İşlemler</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for alis in yatirim.alislar|sort(reverse=true, attribute="tarih") %}
+                    <tr style="color: green">
+                      <td>Alış</td>
+                      <td>{{alis.tarih.strftime('%d.%m.%Y')}}</td>
+                      <td>{{alis.miktar}}</td>
+                      <td>{{"{:,.4f} TL".format(alis.birim_fiyat)}}</td>
+                      <td>{{"{:,.2f} TL".format(alis.toplam_tutar)}}</td>
+                      <td>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                          <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal"
+                            data-target="#alis{{alis.id}}"><span class="fas fa-pen fa-xs"></button>
+                          <!-- ALIŞ GÜNCELLEME MODAL -->
+                          <div class="modal fade" id="alis{{alis.id}}" tabindex="-1" role="dialog"
+                            aria-labelledby="yatirimalisModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                {{m.model_header("Yatırım Alış Güncelleme","yatirimalisModalLabel")}}
+                                  <form action="{{url_for('kisisel.yatirim_alis_guncelle', alis_id=alis.id)}}"
+                                    method="POST">
+                                    {{m.input_group_modal("Tarih","date","yatirimalistarihguncelle",alis.tarih)}}
+                                    {{m.input_group_modal("Miktar","number","yatirimalismiktarguncelle",alis.miktar)}}
+                                    {{m.input_group_modal("BirimFiyat","number","yatirimalisfiyatguncelle",alis.birim_fiyat)}}
+                                    {{m.button_resimsiz("GÜNCELLE")}}
+                                  </form>
+                          {{m.model_kapanis()}}
+                          {{m.sil(alis.id,"alisareadelete",url_for('kisisel.yatirim_alis_sil', alis_id=alis.id))}}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    {% for satis in yatirim.satislar|sort(reverse=true, attribute="tarih") %}
+                    <tr style="color: red">
+                      <td>Satış</td>
+                      <td>{{satis.tarih.strftime('%d.%m.%Y')}}</td>
+                      <td>{{satis.miktar}}</td>
+                      <td>{{"{:,.4f} TL".format(satis.birim_fiyat)}}</td>
+                      <td>{{"{:,.2f} TL".format(satis.toplam_tutar)}}</td>
+                      <td>
+                        <div style="height: 2%;" class="btn-group" role="group" aria-label="Basic example">
+                          <button type="submit" class="btn btn-outline-secondary btn-sm" data-toggle="modal"
+                            data-target="#satis{{satis.id}}"><span class="fas fa-pen fa-xs"></button>
+                          <!-- SATIŞ GÜNCELLEME MODAL -->
+                          <div class="modal fade" id="satis{{satis.id}}" tabindex="-1" role="dialog"
+                            aria-labelledby="yatirimsatisModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                {{m.model_header("Yatırım Satış Güncelleme","yatirimsatisModalLabel")}}
+                                  <form action="{{url_for('kisisel.yatirim_satis_guncelle', satis_id=satis.id)}}"
+                                    method="POST">
+                                    {{m.input_group_modal("Tarih","date","yatirimsatistarihguncelle",satis.tarih)}}
+                                    {{m.input_group_modal("Miktar","number","yatirimsatismiktarguncelle",satis.miktar)}}
+                                    {{m.input_group_modal("BirimFiyat","number","yatirimsatisfiyatguncelle",satis.birim_fiyat)}}
+                                    {{m.button_resimsiz("GÜNCELLE")}}
+                                  </form>
+                          {{m.model_kapanis()}}
+                          {{m.sil(satis.id,"satisareadelete",url_for('kisisel.yatirim_satis_sil', satis_id=satis.id))}}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ALIŞ EKLEME MODAL -->
+{{m.model_acilis("alis","yatirimalisModalLabel")}}
+  {{m.model_header("Yatırım Alış","yatirimalisModalLabel")}}
+  <form action="{{url_for('kisisel.yatirim_alis_ekle')}}" method="POST">
+    {% call m.select_modal("Yatırım Türü","yatirimalisyatirimekle") %}
+    {% for yatirim in yatirimlar %}
+        <option value="{{yatirim.kisa}}">{{yatirim.isim}}</option>
+    {% endfor %}
+    {% endcall %}
+    {{m.input_group_modal("Tarih","date","yatirimalistarihekle", "")}}
+    {{m.input_group_modal("Miktar","number","yatirimalismiktarekle", "")}}
+    {{m.input_group_modal("BirimFiyat","number","yatirimalisfiyatekle", "")}}
+    {{m.button_resimsiz("KAYDET")}}
+  </form>
+{{m.model_kapanis()}}
+
+<!-- SATIŞ EKLEME MODAL -->
+{{m.model_acilis("satis","yatirimsatisModalLabel")}}
+  {{m.model_header("Yatırım Satış","yatirimsatisModalLabel")}}
+  <form action="{{url_for('kisisel.yatirim_satis_ekle')}}" method="POST">
+    {% call m.select_modal("Yatırım Türü","yatirimsatisyatirimekle") %}
+    {% for yatirim in yatirimlar %}
+        <option id="satisoption" value="{{yatirim.kisa}}">{{yatirim.isim}}</option>
+    {% endfor %}
+    {% endcall %}
+    {{m.input_group_modal("Tarih","date","yatirimsatistarihekle", "")}}
+    {{m.input_group_modal("Miktar","number","yatirimsatismiktarekle", "")}}
+    {{m.input_group_modal("BirimFiyat","number","yatirimsatisfiyatekle", "")}}
+    {{m.button_resimsiz("KAYDET")}}
+  </form>
+{{m.model_kapanis()}}
+
+<!-- YATIRIM EKLEME MODAL -->
+{{m.model_acilis("yatirimekle","yatirimLabel")}}
+  {{m.model_header("Yeni Yatırım Ekle","yatirimLabel")}}
+  <form action="{{url_for('kisisel.yatirim_ekle')}}" method="POST">
+    {{m.input_group_modal("Tür","text","yatirimturekle", "")}}
+    {{m.input_group_modal("İsim","text","yatirimisimekle", "")}}
+    {{m.input_group_modal("Kısaltma","text","yatirimkisaekle","")}}
+    {{m.input_group_modal("Birim","text","yatirimbirimekle", "")}}
+    {{m.input_group_modal("Risk","text","yatirimriskekle", "")}}
+    {{m.input_group_modal("Resim URL","text","yatirimresimekle", "")}}
+    {% call m.select_modal("Yatırım Durumu","yatirimdurumekle") %}
+      <option id="satisoption2" value="Aktif">Aktif</option>
+      <option id="satisoption3" value="Pasif">Pasif</option>
+    {% endcall %}
+    {{m.button_resimsiz("KAYDET")}}
+  </form>
+{{m.model_kapanis()}}
+
+<!-- YATIRIM DURUM PASİF -->
+{{m.model_acilis("yatirimkaldir","yatirimdurumLabel")}}
+  {{m.model_header("Yatırım Kaldır","yatirimdurumLabel")}}
+  <form action="{{url_for('kisisel.yatirim_kaldir')}}" method="POST">
+    {% call m.select_modal("Yatırım İsmi","yatirimadi") %}
+    {% for yatirim in yatirimlar %}
+      <option value="{{yatirim.kisa}}">{{yatirim.isim}}</option>
+    {% endfor %}
+    {% endcall %} 
+    {{m.button_resimsiz("KALDIR")}}
+  </form>
+{{m.model_kapanis()}}
+
+<!-- YATIRIM DURUM AKTİF -->
+{{m.model_acilis("yatirimgetir","yatirimdurum2Label")}}
+  {{m.model_header("Yatırım Getir","yatirimdurum2Label")}}
+  <form action="{{url_for('kisisel.yatirim_getir')}}" method="POST">
+    {% call m.select_modal("Yatırım İsmi","yatirimadi2") %}
+    {% for yatirim in tum_yatirimlar %}
+        <option value="{{yatirim.kisa}}">{{yatirim.isim}}</option>
+    {% endfor %}
+    {% endcall %}      
+    {{m.button_resimsiz("GETİR")}}
+  </form>
+{{m.model_kapanis()}}
+
+
+{% block script %}
+<script src="{{url_for ('static', filename='js/yatirim.js')}}"></script>
+{% endblock script %}
+{% endblock body %}
